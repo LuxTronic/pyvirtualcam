@@ -1,5 +1,9 @@
 # pyvirtualcam
 
+[![PyPI version](https://img.shields.io/pypi/v/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
+[![CI](https://github.com/letmaik/pyvirtualcam/actions/workflows/ci.yml/badge.svg)](https://github.com/letmaik/pyvirtualcam/actions/workflows/ci.yml)
+
 pyvirtualcam sends frames to a virtual camera from Python.
 
 ## Usage
