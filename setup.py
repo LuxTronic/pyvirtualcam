@@ -148,8 +148,8 @@ setup(
     name='pyvirtualcam',
     version=__version__,
     author='Maik Riechert',
-    url='https://github.com/letmaik/pyvirtualcam',
-    description='Send frames to a virtual camera',
+    url='https://github.com/LuxTronic/pyvirtualcam',
+    description='Send frames to a virtual camera (fork with Python 3.8 support)',
     long_description = open('README.md').read(),
     long_description_content_type='text/markdown',
     classifiers=[
