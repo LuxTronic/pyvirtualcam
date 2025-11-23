@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Type
+from typing import Optional, Dict, Type, Union, List
 from abc import ABC, abstractmethod
 import platform
 import time
@@ -178,9 +178,14 @@ class Camera:
     :param device: The virtual camera device to use.
         If ``None``, the first available device is used.
 
+        For ``v4l2loopback`` (Linux), can be a string for a single device
+        or a list of strings for multiple devices. When multiple devices
+        are specified, frames are duplicated to all devices with a single
+        format conversion, reducing memory usage.
+
         Built-in backends:
 
-        - ``v4l2loopback`` (Linux): ``/dev/video<n>``
+        - ``v4l2loopback`` (Linux): ``/dev/video<n>`` or ``["/dev/video0", "/dev/video1"]``
         - ``obs`` (macOS/Windows): ``OBS Virtual Camera``
         - ``unitycapture`` (Windows): ``Unity Video Capture``, or the name you gave to the device
     :param backend: The virtual camera backend to use.
@@ -198,10 +203,17 @@ class Camera:
     """
     def __init__(self, width: int, height: int, fps: float, *,
                  fmt: PixelFormat=PixelFormat.RGB,
-                 device: Optional[str]=None,
+                 device: Optional[Union[str, List[str]]]=None,
                  backend: Optional[str]=None,
                  print_fps: bool=False,
                  **kw) -> None:
+        # Normalize device parameter to list for v4l2loopback backend
+        # Keep as-is for other backends for backward compatibility
+        device_normalized = device
+        if backend == 'v4l2loopback' or (backend is None and platform.system() == 'Linux'):
+            if device is not None and not isinstance(device, list):
+                device_normalized = [device]
+
         if backend:
             backends = [(backend, BACKENDS[backend])]
         else:
@@ -210,10 +222,12 @@ class Camera:
         errors = []
         for name, clazz in backends:
             try:
+                # Use normalized device for v4l2loopback, original for others
+                dev_param = device_normalized if name == 'v4l2loopback' else device
                 self._backend = clazz(
                     width=width, height=height, fps=fps,
                     fourcc=encode_fourcc(fmt.value),
-                    device=device,
+                    device=dev_param,
                     **kw)
             except Exception as e:
                 errors.append(f"'{name}' backend: {e}")
