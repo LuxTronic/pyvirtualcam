@@ -2,9 +2,11 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
-[![CI](https://github.com/letmaik/pyvirtualcam/actions/workflows/ci.yml/badge.svg)](https://github.com/letmaik/pyvirtualcam/actions/workflows/ci.yml)
+[![CI](https://github.com/LuxTronic/pyvirtualcam/actions/workflows/ci.yml/badge.svg)](https://github.com/LuxTronic/pyvirtualcam/actions/workflows/ci.yml)
 
 pyvirtualcam sends frames to a virtual camera from Python.
+
+> **Note:** This is a fork of the original [pyvirtualcam](https://github.com/letmaik/pyvirtualcam) with added support for Python 3.8. While the original package is available on PyPI, this fork provides wheels as GitHub Actions artifacts. Download them from the [Actions tab](https://github.com/LuxTronic/pyvirtualcam/actions) after each CI run.
 
 ## Usage
 
@@ -36,11 +38,22 @@ See also the [API Documentation](https://letmaik.github.io/pyvirtualcam).
 
 ## Installation
 
-This package works on Windows, macOS, and Linux. Install it from [PyPI](https://pypi.org/project/pyvirtualcam/) with:
+This package works on Windows, macOS, and Linux.
+
+### Installing from PyPI (Original Package - Python 3.9+)
+The original package can be installed from [PyPI](https://pypi.org/project/pyvirtualcam/):
 
 ```sh
 pip install pyvirtualcam
 ```
+
+### Installing from GitHub Actions Artifacts (This Fork - Python 3.8+)
+This fork with Python 3.8 support provides wheels as GitHub Actions artifacts:
+
+1. Go to the [Actions tab](https://github.com/LuxTronic/pyvirtualcam/actions)
+2. Click on a recent successful workflow run
+3. Download the wheel for your platform and Python version from the Artifacts section
+4. Install with: `pip install downloaded_wheel.whl`
 
 pyvirtualcam relies on existing virtual cameras which have to be installed first. See the next section for details.
 
@@ -94,7 +107,7 @@ For further information, see the [v4l2loopback documentation](https://github.com
 ### Linux/macOS
 
 ```sh
-git clone https://github.com/letmaik/pyvirtualcam --recursive
+git clone https://github.com/LuxTronic/pyvirtualcam --recursive
 cd pyvirtualcam
 pip install .
 ```
@@ -112,7 +125,7 @@ $env:USE_CONDA = '1'
 $env:PYTHON_VERSION = '3.7'
 $env:PYTHON_ARCH = '64'
 $env:NUMPY_VERSION = '1.14'
-git clone https://github.com/letmaik/pyvirtualcam --recursive
+git clone https://github.com/LuxTronic/pyvirtualcam --recursive
 cd pyvirtualcam
 powershell .github/scripts/build-windows.ps1
 ```
