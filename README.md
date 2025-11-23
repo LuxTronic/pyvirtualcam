@@ -1,8 +1,8 @@
 # pyvirtualcam
 
-[![PyPI version](https://img.shields.io/pypi/v/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
-[![Python versions](https://img.shields.io/pypi/pyversions/pyvirtualcam.svg)](https://pypi.org/project/pyvirtualcam/)
 [![CI](https://github.com/LuxTronic/pyvirtualcam/actions/workflows/ci.yml/badge.svg)](https://github.com/LuxTronic/pyvirtualcam/actions/workflows/ci.yml)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-GPLv2-green.svg)](https://github.com/LuxTronic/pyvirtualcam/blob/main/LICENSE)
 
 pyvirtualcam sends frames to a virtual camera from Python.
 
