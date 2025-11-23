@@ -48,12 +48,23 @@ pip install pyvirtualcam
 ```
 
 ### Installing from GitHub Actions Artifacts (This Fork - Python 3.8+)
-This fork with Python 3.8 support provides wheels as GitHub Actions artifacts:
+This fork with Python 3.8 support provides wheels as GitHub Actions artifacts.
 
-1. Go to the [Actions tab](https://github.com/LuxTronic/pyvirtualcam/actions)
-2. Click on a recent successful workflow run
-3. Download the wheel for your platform and Python version from the Artifacts section
-4. Install with: `pip install downloaded_wheel.whl`
+**To download wheels:**
+
+1. Go to the [Actions tab](https://github.com/LuxTronic/pyvirtualcam/actions/workflows/ci.yml)
+2. Click on the most recent workflow run (look for green checkmark or red X)
+3. Scroll down to the "Artifacts" section at the bottom
+4. Download the wheel for your platform and Python version:
+   - **Linux ARM64**: `wheel-linux-aarch64-3.X`
+   - **Linux x86_64**: `wheel-linux-x86_64-3.X`
+   - **macOS ARM64** (M1/M2/M3): `wheel-mac-arm64-3.X` (Python 3.10+ only)
+   - **macOS x86_64**: `wheel-mac-x86_64-3.X`
+   - **Windows x86_64**: `wheel-windows-x86_64-3.X`
+5. Extract the downloaded ZIP file
+6. Install with: `pip install pyvirtualcam-*.whl`
+
+**Note:** Artifacts expire after 90 days. If you need wheels for production, consider building from source or setting up your own artifact storage.
 
 pyvirtualcam relies on existing virtual cameras which have to be installed first. See the next section for details.
 

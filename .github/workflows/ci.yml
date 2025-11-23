@@ -512,6 +512,9 @@ jobs:
 
     needs: [test, docs]
 
+    # Only run if GitHub Pages is enabled (on main branch with tag, or manually triggered)
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
