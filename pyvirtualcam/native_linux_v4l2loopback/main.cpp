@@ -13,8 +13,8 @@ class Camera {
 
   public:
     Camera(uint32_t width, uint32_t height, [[maybe_unused]] double fps,
-           uint32_t fourcc, std::optional<std::string> device_)
-     : virtual_output {width, height, fourcc, device_} {
+           uint32_t fourcc, std::optional<std::vector<std::string>> devices_)
+     : virtual_output {width, height, fourcc, devices_} {
     }
 
     void close() {
@@ -37,7 +37,7 @@ class Camera {
 
 PYBIND11_MODULE(_native_linux_v4l2loopback, m) {
     py::class_<Camera>(m, "Camera")
-        .def(py::init<uint32_t, uint32_t, double, uint32_t, std::optional<std::string>>(),
+        .def(py::init<uint32_t, uint32_t, double, uint32_t, std::optional<std::vector<std::string>>>(),
              py::kw_only(),
              py::arg("width"), py::arg("height"), py::arg("fps"),
              py::arg("fourcc"), py::arg("device"))

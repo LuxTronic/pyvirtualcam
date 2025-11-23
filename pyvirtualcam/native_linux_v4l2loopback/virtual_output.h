@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 
 #include "../native_shared/image_formats.h"
@@ -27,8 +28,8 @@ static std::set<std::string> ACTIVE_DEVICES;
 class VirtualOutput {
   private:
     bool _output_running = false;
-    int _camera_fd;
-    std::string _camera_device;
+    std::vector<int> _camera_fds;
+    std::vector<std::string> _camera_devices;
     uint32_t _frame_fourcc;
     uint32_t _native_fourcc;
     uint32_t _frame_width;
@@ -38,7 +39,7 @@ class VirtualOutput {
 
   public:
     VirtualOutput(uint32_t width, uint32_t height, uint32_t fourcc,
-                  std::optional<std::string> device_) {
+                  std::optional<std::vector<std::string>> devices_) {
         _frame_width = width;
         _frame_height = height;
         _frame_fourcc = libyuv::CanonicalFourCC(fourcc);
@@ -83,14 +84,14 @@ class VirtualOutput {
                 throw std::runtime_error("Unsupported image format.");
         }
 
-        auto try_open = [&](const std::string& device_name) {
+        auto try_open = [&](const std::string& device_name) -> int {
             if (ACTIVE_DEVICES.count(device_name)) {
                 throw std::invalid_argument(
                     "Device " + device_name + " is already in use."
                 );
             }
-            _camera_fd = open(device_name.c_str(), O_WRONLY | O_SYNC);
-            if (_camera_fd == -1) {
+            int camera_fd = open(device_name.c_str(), O_WRONLY | O_SYNC);
+            if (camera_fd == -1) {
                 if (errno == EACCES) {
                     throw std::runtime_error(
                         "Could not access " + device_name + " due to missing permissions. "
@@ -103,7 +104,7 @@ class VirtualOutput {
                     );
                 } else {
                     throw std::invalid_argument(
-                        "Device " + device_name + " could not be opened: " + 
+                        "Device " + device_name + " could not be opened: " +
                         std::string(strerror(errno))
                     );
                 }
@@ -112,7 +113,7 @@ class VirtualOutput {
             try {
                 struct v4l2_capability camera_cap;
 
-                if (ioctl(_camera_fd, VIDIOC_QUERYCAP, &camera_cap) == -1) {
+                if (ioctl(camera_fd, VIDIOC_QUERYCAP, &camera_cap) == -1) {
                     throw std::invalid_argument(
                         "Device capabilities of " + device_name + " could not be queried."
                     );
@@ -128,30 +129,47 @@ class VirtualOutput {
                     );
                 }
             } catch (std::exception &ex) {
-                close(_camera_fd);
-                _camera_fd = -1;
+                close(camera_fd);
                 throw;
             }
+            return camera_fd;
         };
 
-        std::string device_name;
+        bool auto_detect = !devices_.has_value();
+        std::vector<std::string> device_names;
 
-        if (device_.has_value()) {
-            device_name = device_.value();
-            try_open(device_name);
+        if (!auto_detect) {
+            device_names = devices_.value();
+            if (device_names.empty()) {
+                throw std::invalid_argument("Device list cannot be empty.");
+            }
         } else {
+            // Auto-detect all potential v4l2loopback devices
             bool found = false;
             for (size_t i = 0; i < 100; i++) {
                 std::ostringstream device_name_s;
                 device_name_s << "/dev/video" << i;
-                device_name = device_name_s.str();
-                try {
-                    try_open(device_name);
-                } catch (std::invalid_argument&) {
+                std::string device_name = device_name_s.str();
+
+                // Check if device exists and is valid, but don't keep it open
+                int test_fd = open(device_name.c_str(), O_WRONLY | O_SYNC);
+                if (test_fd == -1) {
                     continue;
                 }
-                found = true;
-                break;
+
+                struct v4l2_capability camera_cap;
+                bool is_valid = false;
+                if (ioctl(test_fd, VIDIOC_QUERYCAP, &camera_cap) != -1 &&
+                    (camera_cap.capabilities & V4L2_CAP_VIDEO_OUTPUT) &&
+                    strcmp((const char*)camera_cap.driver, "v4l2 loopback") == 0) {
+                    is_valid = true;
+                }
+                close(test_fd);
+
+                if (is_valid) {
+                    device_names.push_back(device_name);
+                    found = true;
+                }
             }
             if (!found) {
                 throw std::runtime_error(
@@ -161,28 +179,79 @@ class VirtualOutput {
             }
         }
 
-        v4l2_format v4l2_fmt;
-        memset(&v4l2_fmt, 0, sizeof(v4l2_fmt));
-        v4l2_fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
-        v4l2_pix_format& pix = v4l2_fmt.fmt.pix;
-        pix.width = width;
-        pix.height = height;
-        pix.pixelformat = out_frame_fmt_v4l;
+        auto cleanup_open_devices = [&]() {
+            for (int fd : _camera_fds) {
+                close(fd);
+            }
+            for (const auto& dev : _camera_devices) {
+                ACTIVE_DEVICES.erase(dev);
+            }
+        };
 
-        // v4l2loopback sets bytesperline, sizeimage, and colorspace for us.
+        bool opened_device = false;
 
-        if (ioctl(_camera_fd, VIDIOC_S_FMT, &v4l2_fmt) == -1) {
-            close(_camera_fd);
-            throw std::runtime_error(
-                "Virtual camera device " + device_name + 
-                " could not be configured: " + std::string(strerror(errno))
-            );
+        // Open and configure all devices
+        for (const auto& device_name : device_names) {
+            int camera_fd;
+            try {
+                camera_fd = try_open(device_name);
+            } catch (const std::invalid_argument& ex) {
+                if (auto_detect) {
+                    continue;
+                }
+                cleanup_open_devices();
+                throw;
+            } catch (std::exception& ex) {
+                cleanup_open_devices();
+                throw;
+            }
+
+            v4l2_format v4l2_fmt;
+            memset(&v4l2_fmt, 0, sizeof(v4l2_fmt));
+            v4l2_fmt.type = V4L2_BUF_TYPE_VIDEO_OUTPUT;
+            v4l2_pix_format& pix = v4l2_fmt.fmt.pix;
+            pix.width = width;
+            pix.height = height;
+            pix.pixelformat = out_frame_fmt_v4l;
+
+            // v4l2loopback sets bytesperline, sizeimage, and colorspace for us.
+
+            if (ioctl(camera_fd, VIDIOC_S_FMT, &v4l2_fmt) == -1) {
+                close(camera_fd);
+                // Close any already opened devices before throwing
+                for (int fd : _camera_fds) {
+                    close(fd);
+                }
+                for (const auto& dev : _camera_devices) {
+                    ACTIVE_DEVICES.erase(dev);
+                }
+                throw std::runtime_error(
+                    "Virtual camera device " + device_name +
+                    " could not be configured: " + std::string(strerror(errno))
+                );
+            }
+
+            _camera_fds.push_back(camera_fd);
+            _camera_devices.push_back(device_name);
+            ACTIVE_DEVICES.insert(device_name);
+            opened_device = true;
+
+            if (auto_detect) {
+                break;
+            }
         }
-        
-        _output_running = true;
-        _camera_device = device_name;
 
-        ACTIVE_DEVICES.insert(_camera_device);
+        if (!opened_device) {
+            if (auto_detect) {
+                throw std::runtime_error(
+                    "All v4l2 loopback devices at /dev/video[0-99] are busy. "
+                    "Is another process using them?"
+                );
+            }
+            throw std::runtime_error("Failed to open any of the requested devices.");
+        }
+
+        _output_running = true;
     }
 
     void stop() {
@@ -190,10 +259,15 @@ class VirtualOutput {
             return;
         }
 
-        close(_camera_fd);
-        
+        for (int fd : _camera_fds) {
+            close(fd);
+        }
+
+        for (const auto& device : _camera_devices) {
+            ACTIVE_DEVICES.erase(device);
+        }
+
         _output_running = false;
-        ACTIVE_DEVICES.erase(_camera_device);
     }
 
     void send(const uint8_t* frame) {
@@ -222,15 +296,26 @@ class VirtualOutput {
                 throw std::logic_error("not implemented");
         }
 
-        ssize_t n = write(_camera_fd, out_frame, _out_frame_size);
-        if (n == -1) {
-            // not an exception, in case it is temporary
-            fprintf(stderr, "error writing frame: %s", strerror(errno));
+        // Write to all devices
+        for (size_t i = 0; i < _camera_fds.size(); i++) {
+            ssize_t n = write(_camera_fds[i], out_frame, _out_frame_size);
+            if (n == -1) {
+                // not an exception, in case it is temporary
+                fprintf(stderr, "error writing frame to %s: %s\n",
+                        _camera_devices[i].c_str(), strerror(errno));
+            }
         }
     }
 
     std::string device() {
-        return _camera_device;
+        if (_camera_devices.empty()) {
+            return "";
+        }
+        std::string result = _camera_devices[0];
+        for (size_t i = 1; i < _camera_devices.size(); i++) {
+            result += ", " + _camera_devices[i];
+        }
+        return result;
     }
 
     uint32_t native_fourcc() {
