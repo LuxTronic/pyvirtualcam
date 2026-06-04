@@ -34,7 +34,7 @@ jobs:
         # NOTE: When updating this list, also update the 'test' job!
         - os-image: ubuntu-latest
           os-name: linux
-          docker-image: quay.io/pypa/manylinux2014_x86_64
+          docker-image: quay.io/pypa/manylinux2014_x86_64:2026.05.01-2
           python-arch: 'x86_64'
           python-version: '3.8'
           numpy-version: '1.24.*'
@@ -71,7 +71,7 @@ jobs:
 
         - os-image: ubuntu-latest
           os-name: linux
-          docker-image: quay.io/pypa/manylinux_2_28_aarch64
+          docker-image: quay.io/pypa/manylinux2014_aarch64:2026.05.01-2
           python-arch: 'aarch64'
           python-version: '3.8'
           numpy-version: '1.24.*'
@@ -232,7 +232,7 @@ jobs:
         config:
         - os-image: ubuntu-latest
           os-name: linux
-          docker-image: quay.io/pypa/manylinux2014_x86_64
+          docker-image: quay.io/pypa/manylinux2014_x86_64:2026.05.01-2
           python-arch: 'x86_64'
           python-version: '3.8'
           numpy-version: '1.24.*'
@@ -269,7 +269,7 @@ jobs:
 
         - os-image: ubuntu-latest
           os-name: linux
-          docker-image: quay.io/pypa/manylinux_2_28_aarch64
+          docker-image: quay.io/pypa/manylinux2014_aarch64:2026.05.01-2
           python-arch: 'aarch64'
           python-version: '3.8'
           numpy-version: '1.24.*'

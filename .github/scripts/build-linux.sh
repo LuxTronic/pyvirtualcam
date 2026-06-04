@@ -46,6 +46,10 @@ ${PYBIN}/pip freeze
 
 # Build pyvirtualcam wheel
 export LDFLAGS="-Wl,--strip-debug"
+if [ "$PYTHON_VERSION" == "3.13" ]; then
+    # PyO3 0.21 officially supports up to Python 3.12; build cp313 via stable ABI.
+    export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+fi
 ${PYBIN}/python setup.py bdist_wheel --dist-dir dist-tmp
 
 # Bundle external shared libraries into wheel and fix the wheel tags
