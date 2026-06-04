@@ -13,4 +13,6 @@ wheelhouse
 external/miniconda*
 *.png
 *.json
+!.codex/luxie-tronic-policy.json
+!.github/lux-ci-config.json
 env
