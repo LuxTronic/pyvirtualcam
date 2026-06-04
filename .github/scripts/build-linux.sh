@@ -26,15 +26,30 @@ if [ ! -z "$GITHUB_ENV" ]; then
     echo "PATH=$PYBIN:$PATH" >> $GITHUB_ENV
 fi
 
+# Install Rust for the Linux backend.
+if ! command -v cargo >/dev/null 2>&1; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --profile minimal --default-toolchain stable
+fi
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
+rustc --version
+cargo --version
+
 # install compile-time dependencies
 ${PYBIN}/pip install numpy==${NUMPY_VERSION}
-${PYBIN}/pip install setuptools
+${PYBIN}/pip install setuptools 'setuptools-rust>=1.10.2,<1.11.0'
 
 # List installed packages
 ${PYBIN}/pip freeze
 
 # Build pyvirtualcam wheel
 export LDFLAGS="-Wl,--strip-debug"
+if [ "$PYTHON_VERSION" == "3.13" ]; then
+    # PyO3 0.21 officially supports up to Python 3.12; build cp313 via stable ABI.
+    export PYO3_USE_ABI3_FORWARD_COMPATIBILITY=1
+fi
 ${PYBIN}/python setup.py bdist_wheel --dist-dir dist-tmp
 
 # Bundle external shared libraries into wheel and fix the wheel tags

@@ -25,9 +25,15 @@ permissions:
   issues: write
 jobs:
   review:
-    uses: LuxTronic/luxie-workflows/.github/workflows/reusable-luxie-tronic.yml@v1.6
+    uses: LuxTronic/luxie-workflows/.github/workflows/reusable-luxie-tronic.yml@903723cb3831e5721ce78e19b6ec53d061f0388f # v1.6
     with:
-      automation_ref: v1.6
+      automation_ref: 903723cb3831e5721ce78e19b6ec53d061f0388f
       policy_path: .codex/luxie-tronic-policy.json
       pr_number: ${{ github.event.inputs.pr_number || '' }}
-    secrets: inherit
+    secrets:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      CODEX_BOT_PAT: ${{ secrets.CODEX_BOT_PAT }}
+      CODEX_BOT_GPG_PRIVATE_KEY: ${{ secrets.CODEX_BOT_GPG_PRIVATE_KEY }}
+      CODEX_BOT_GPG_PASSPHRASE: ${{ secrets.CODEX_BOT_GPG_PASSPHRASE }}
+      CODEX_BOT_GIT_NAME: ${{ secrets.CODEX_BOT_GIT_NAME }}
+      CODEX_BOT_GIT_EMAIL: ${{ secrets.CODEX_BOT_GIT_EMAIL }}

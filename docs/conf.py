@@ -93,11 +93,10 @@ html_theme = "pydata_sphinx_theme"
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "search_bar_position": "navbar",
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/letmaik/pyvirtualcam",
+            "url": "https://github.com/LuxTronic/pyvirtualcam",
             "icon": "fab fa-github-square",
         },
         {

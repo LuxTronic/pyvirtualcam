@@ -9,6 +9,12 @@ import setuptools
 
 from distutils.unixccompiler import UnixCCompiler
 
+try:
+    from setuptools_rust import Binding, RustExtension
+except ImportError:
+    Binding = None
+    RustExtension = None
+
 class get_pybind_include(object):
     """Helper class to determine the pybind11 include path
     The purpose of this class is to postpone importing pybind11
@@ -20,6 +26,7 @@ class get_pybind_include(object):
         return pybind11.get_include()
 
 ext_modules = []
+rust_extensions = []
 
 common_src = glob.glob('external/libyuv/source/*.cc')
 common_inc = [get_pybind_include(), 'external/libyuv/include']
@@ -73,14 +80,15 @@ elif platform.system() == 'Darwin':
         )
     )
 elif platform.system() == 'Linux':
-    ext_modules.append(
-        Extension('pyvirtualcam._native_linux_v4l2loopback',
-            # Sort input source files to ensure bit-for-bit reproducible builds
-            # (https://github.com/pybind/python_example/pull/53)
-            sorted(['pyvirtualcam/native_linux_v4l2loopback/main.cpp'] + common_src),
-            include_dirs=['pyvirtualcam/native_linux_v4l2loopback'] + common_inc,
-            extra_compile_args=['-flto'],
-            language='c++'
+    if RustExtension is None:
+        raise RuntimeError(
+            "setuptools-rust is required to build the Linux v4l2loopback backend"
+        )
+    rust_extensions.append(
+        RustExtension(
+            'pyvirtualcam._native_linux_v4l2loopback',
+            path='crates/pyvirtualcam-py/Cargo.toml',
+            binding=Binding.PyO3,
         )
     )
 else:
@@ -171,8 +179,13 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
     ext_modules=ext_modules,
+    rust_extensions=rust_extensions,
     packages = find_packages(),
-    setup_requires=['pybind11>=2.6.0'],
+    setup_requires=(
+        ['pybind11>=2.6.0', 'setuptools-rust>=1.10.2,<1.11.0']
+        if platform.system() == 'Linux'
+        else ['pybind11>=2.6.0']
+    ),
     install_requires=['numpy'],
     python_requires='>=3.8',
     cmdclass={'build_ext': BuildExt},

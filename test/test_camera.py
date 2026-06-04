@@ -51,7 +51,7 @@ def test_select_camera_device(backend: str):
         device = 'OBS Virtual Camera'
     elif backend == 'unitycapture':
         device = 'Unity Video Capture'
-    elif backend == 'v4l2capture':
+    elif backend == 'v4l2loopback':
         device = '/dev/video0'
     else:
         raise NotImplementedError
@@ -65,7 +65,7 @@ def test_select_invalid_camera_device(backend: str):
         device = 'Foo'
     elif backend == 'unitycapture':
         device = 'Unity Video Capture #20'
-    elif backend == 'v4l2capture':
+    elif backend == 'v4l2loopback':
         device = '/dev/video123'
     else:
         raise NotImplementedError

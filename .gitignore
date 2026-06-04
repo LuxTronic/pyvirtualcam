@@ -4,12 +4,14 @@ build
 dist
 dist-docs
 *.pyd
+*.so
 *.pyc
 *.zip
 *.exe
 .vscode
 tmp
 wheelhouse
+target
 external/miniconda*
 *.png
 *.json

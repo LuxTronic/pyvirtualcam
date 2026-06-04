@@ -1,0 +1,4 @@
+include Cargo.toml
+recursive-include crates *.toml *.rs *.cpp
+recursive-include external/libyuv/include *.h
+recursive-include external/libyuv/source *.cc
