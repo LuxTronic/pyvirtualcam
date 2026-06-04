@@ -26,9 +26,18 @@ if [ ! -z "$GITHUB_ENV" ]; then
     echo "PATH=$PYBIN:$PATH" >> $GITHUB_ENV
 fi
 
+# Install Rust for the Linux backend.
+if ! command -v cargo >/dev/null 2>&1; then
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+        | sh -s -- -y --profile minimal --default-toolchain stable
+fi
+source "$HOME/.cargo/env"
+rustc --version
+cargo --version
+
 # install compile-time dependencies
 ${PYBIN}/pip install numpy==${NUMPY_VERSION}
-${PYBIN}/pip install setuptools
+${PYBIN}/pip install setuptools setuptools-rust
 
 # List installed packages
 ${PYBIN}/pip freeze

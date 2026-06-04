@@ -1,0 +1,17 @@
+[package]
+name = "pyvirtualcam-core"
+version = "0.0.0"
+edition = "2021"
+license = "GPL-2.0-only"
+build = "build.rs"
+readme = "README.md"
+
+[features]
+default = ["linux"]
+linux = []
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+cc = "1"

@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/pyvirtualcam-core",
+    "crates/pyvirtualcam-py",
+]
+resolver = "2"

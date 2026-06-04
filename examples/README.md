@@ -53,3 +53,23 @@ python ./examples/latency.py
 **Description:** Reads RGBA frames from a GIF animation and sends them to a virtual camera while preserving transparency. Useful for post-processing in other software like OBS Studio.
 
 *screencast tbd*
+
+## Multi Device
+
+**Source:** [multi_device.py](multi_device.py)
+
+**Description:** Sends the same frames to multiple Linux `v4l2loopback` devices from Python.
+
+```sh
+python ./examples/multi_device.py
+```
+
+## Native Rust
+
+**Source:** [../crates/pyvirtualcam-core/examples/simple.rs](../crates/pyvirtualcam-core/examples/simple.rs)
+
+**Description:** Demonstrates the initial native Rust API for the Linux `v4l2loopback` backend.
+
+```sh
+cargo run -p pyvirtualcam-core --example simple
+```

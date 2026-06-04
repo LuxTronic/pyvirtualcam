@@ -32,9 +32,9 @@ with pyvirtualcam.Camera(width=1280, height=720, fps=20) as cam:
     
 pyvirtualcam uses the first available virtual camera it finds (see later section).
 
-For more examples, including using different pixel formats like BGR, or selecting a specific camera device, check out the [`examples/`](https://github.com/letmaik/pyvirtualcam/tree/main/examples) folder.
+For more examples, including using different pixel formats like BGR, selecting a specific camera device, sending to multiple Linux devices, or using the native Rust API, check out the [`examples/`](examples/) folder.
 
-See also the [API Documentation](https://letmaik.github.io/pyvirtualcam).
+See also the [API Documentation](docs/index.rst) (build with `sphinx-build -b html docs dist-docs`) and the shared [upstream docs](https://letmaik.github.io/pyvirtualcam).
 
 ## Installation
 
@@ -60,13 +60,24 @@ This fork with Python 3.8 support provides wheels as GitHub Actions artifacts.
    - **Linux x86_64**: `wheel-linux-x86_64-3.X`
    - **macOS ARM64** (M1/M2/M3): `wheel-mac-arm64-3.X` (Python 3.10+ only)
    - **macOS x86_64**: `wheel-mac-x86_64-3.X`
-   - **Windows x86_64**: `wheel-windows-x86_64-3.X`
 5. Extract the downloaded ZIP file
 6. Install with: `pip install pyvirtualcam-*.whl`
 
 **Note:** Artifacts expire after 90 days. If you need wheels for production, consider building from source or setting up your own artifact storage.
 
+**Windows note:** The Windows backend sources and build scripts are still present, but this fork's active GitHub Actions workflow currently publishes Linux and macOS wheels only.
+
 pyvirtualcam relies on existing virtual cameras which have to be installed first. See the next section for details.
+
+## Rust backend status
+
+The Linux `v4l2loopback` backend is implemented in Rust and exposed through the existing Python API. The Rust core crate also provides an initial native Rust API for Linux consumers. Windows and macOS still use the existing native backends.
+
+Native Rust example:
+
+```sh
+cargo run -p pyvirtualcam-core --example simple
+```
 
 ## Supported virtual cameras
 
@@ -123,10 +134,12 @@ cd pyvirtualcam
 pip install .
 ```
 
+Linux source builds require a Rust toolchain because the `v4l2loopback` backend is implemented in Rust. Install Rust with [rustup](https://rustup.rs/) before running `pip install .`.
+
 ### Windows
 
 These instructions are experimental and support is not provided for them.
-Typically, there should be no need to build manually since wheels are hosted on PyPI.
+Typically, there should be no need to build manually since wheels are published by CI for supported platforms.
 
 You need to have Visual Studio installed to build pyvirtualcam.
 
