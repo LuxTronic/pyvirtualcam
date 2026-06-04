@@ -5,14 +5,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [0.15.0] - 2026-06-04
 ### Added
 - Rust workspace (`pyvirtualcam-core`, `pyvirtualcam-py`) with a native Rust camera API and PyO3 bindings.
 - Mock backend contract tests (`test/test_backend_contract.py`) for CI without a virtual camera device.
 - `AGENTS.md` and crate-level architecture documentation.
+- Python 3.8 wheel build support for this fork.
 
 ### Changed
 - Linux `v4l2loopback` backend is implemented in Rust; macOS and Windows backends remain C++/ObjC++.
 - Linux CI installs Rust and runs mock Python tests on built wheels.
+- Linux and macOS CI wheel builds use pinned manylinux images and current GitHub-hosted macOS runners.
 
 ## [0.14.0] - 2025-09-10
 ### Added
