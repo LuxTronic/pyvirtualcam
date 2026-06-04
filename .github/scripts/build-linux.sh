@@ -31,13 +31,15 @@ if ! command -v cargo >/dev/null 2>&1; then
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
         | sh -s -- -y --profile minimal --default-toolchain stable
 fi
-source "$HOME/.cargo/env"
+if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+fi
 rustc --version
 cargo --version
 
 # install compile-time dependencies
 ${PYBIN}/pip install numpy==${NUMPY_VERSION}
-${PYBIN}/pip install setuptools setuptools-rust
+${PYBIN}/pip install setuptools 'setuptools-rust>=1.10.2,<1.11.0'
 
 # List installed packages
 ${PYBIN}/pip freeze

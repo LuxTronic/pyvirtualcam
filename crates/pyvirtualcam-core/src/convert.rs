@@ -27,6 +27,12 @@ fn convert_to_i420(
     width: u32,
     height: u32,
 ) -> Result<()> {
+    if width > i32::MAX as u32 || height > i32::MAX as u32 {
+        return Err(Error::invalid_argument(
+            "width and height must fit in i32 for libyuv conversion",
+        ));
+    }
+
     let expected_input = input_format.frame_size(width, height);
     let expected_output = PixelFormat::I420.frame_size(width, height);
     if input.len() < expected_input {

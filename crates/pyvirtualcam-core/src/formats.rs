@@ -45,13 +45,19 @@ impl PixelFormat {
     }
 
     pub fn frame_size(self, width: u32, height: u32) -> usize {
-        let pixels = width as usize * height as usize;
+        let width = width as usize;
+        let height = height as usize;
+        let pixels = width.saturating_mul(height);
         match self {
-            Self::Rgb | Self::Bgr => pixels * 3,
-            Self::Rgba => pixels * 4,
+            Self::Rgb | Self::Bgr => pixels.saturating_mul(3),
+            Self::Rgba => pixels.saturating_mul(4),
             Self::Gray => pixels,
-            Self::I420 | Self::Nv12 => pixels * 3 / 2,
-            Self::Yuyv | Self::Uyvy => pixels * 2,
+            Self::I420 | Self::Nv12 => {
+                let chroma_w = width.div_ceil(2);
+                let chroma_h = height.div_ceil(2);
+                pixels.saturating_add(2 * chroma_w.saturating_mul(chroma_h))
+            }
+            Self::Yuyv | Self::Uyvy => pixels.saturating_mul(2),
         }
     }
 }
@@ -68,6 +74,8 @@ mod tests {
         assert_eq!(PixelFormat::Gray.frame_size(4, 2), 8);
         assert_eq!(PixelFormat::I420.frame_size(4, 2), 12);
         assert_eq!(PixelFormat::Nv12.frame_size(4, 2), 12);
+        assert_eq!(PixelFormat::I420.frame_size(5, 3), 27);
+        assert_eq!(PixelFormat::Nv12.frame_size(5, 3), 27);
         assert_eq!(PixelFormat::Yuyv.frame_size(4, 2), 16);
         assert_eq!(PixelFormat::Uyvy.frame_size(4, 2), 16);
     }

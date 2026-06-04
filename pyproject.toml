@@ -3,6 +3,6 @@ requires = [
     "setuptools>=61",
     "wheel",
     "pybind11>=2.6.0",
-    "setuptools-rust",
+    "setuptools-rust>=1.10.2,<1.11.0",
 ]
 build-backend = "setuptools.build_meta"

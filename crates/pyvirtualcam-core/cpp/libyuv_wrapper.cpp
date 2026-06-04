@@ -14,14 +14,14 @@ extern "C" void pyvc_rgb_to_i420(
     int32_t height
 ) {
     int32_t height_abs = std::abs(height);
-    int32_t half_width = width / 2;
-    int32_t half_height = height_abs / 2;
+    int32_t chroma_width = (width + 1) / 2;
+    int32_t chroma_height = (height_abs + 1) / 2;
 
     libyuv::RAWToI420(
         rgb, width * 3,
         i420, width,
-        i420 + width * height_abs, half_width,
-        i420 + width * height_abs + half_width * half_height, half_width,
+        i420 + width * height_abs, chroma_width,
+        i420 + width * height_abs + chroma_width * chroma_height, chroma_width,
         width, height);
 }
 
@@ -32,13 +32,13 @@ extern "C" void pyvc_bgr_to_i420(
     int32_t height
 ) {
     int32_t height_abs = std::abs(height);
-    int32_t half_width = width / 2;
-    int32_t half_height = height_abs / 2;
+    int32_t chroma_width = (width + 1) / 2;
+    int32_t chroma_height = (height_abs + 1) / 2;
 
     libyuv::RGB24ToI420(
         bgr, width * 3,
         i420, width,
-        i420 + width * height_abs, half_width,
-        i420 + width * height_abs + half_width * half_height, half_width,
+        i420 + width * height_abs, chroma_width,
+        i420 + width * height_abs + chroma_width * chroma_height, chroma_width,
         width, height);
 }

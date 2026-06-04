@@ -29,7 +29,7 @@ set -x
 popd
 
 # Install dependencies
-pip install numpy==$NUMPY_VERSION wheel delocate setuptools setuptools-rust
+pip install numpy==$NUMPY_VERSION wheel delocate setuptools 'setuptools-rust>=1.10.2,<1.11.0'
 
 # List installed packages
 pip freeze

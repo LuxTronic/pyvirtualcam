@@ -98,11 +98,11 @@ impl V4l2LoopbackCamera {
                 unsafe {
                     libc::close(camera_fd);
                 }
+                release_device(&device_name);
                 cleanup_open_devices(&camera_fds, &camera_devices);
                 return Err(err);
             }
 
-            active_devices().lock().unwrap().insert(device_name.clone());
             camera_fds.push(camera_fd);
             camera_devices.push(device_name);
             opened_device = true;
@@ -251,15 +251,30 @@ fn discover_devices() -> Result<Vec<String>> {
 }
 
 fn try_open(device_name: &str) -> Result<RawFd> {
-    if active_devices().lock().unwrap().contains(device_name) {
-        return Err(Error::invalid_argument(format!(
-            "Device {device_name} is already in use."
-        )));
+    {
+        let mut active = active_devices().lock().unwrap();
+        if active.contains(device_name) {
+            return Err(Error::invalid_argument(format!(
+                "Device {device_name} is already in use."
+            )));
+        }
+        active.insert(device_name.to_string());
     }
 
-    let c_device_name = c_string(device_name)?;
+    let release_on_error = |device_name: &str| {
+        release_device(device_name);
+    };
+
+    let c_device_name = match c_string(device_name) {
+        Ok(value) => value,
+        Err(err) => {
+            release_on_error(device_name);
+            return Err(err);
+        }
+    };
     let camera_fd = unsafe { libc::open(c_device_name.as_ptr(), libc::O_WRONLY | libc::O_SYNC) };
     if camera_fd == -1 {
+        release_on_error(device_name);
         let err = std::io::Error::last_os_error();
         match err.raw_os_error() {
             Some(libc::EACCES) => {
@@ -284,10 +299,15 @@ fn try_open(device_name: &str) -> Result<RawFd> {
         unsafe {
             libc::close(camera_fd);
         }
+        release_on_error(device_name);
         return Err(err);
     }
 
     Ok(camera_fd)
+}
+
+fn release_device(device_name: &str) {
+    active_devices().lock().unwrap().remove(device_name);
 }
 
 fn validate_fd(camera_fd: RawFd, device_name: &str) -> Result<()> {
@@ -452,12 +472,15 @@ struct V4l2Format {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::mem::offset_of;
 
     #[test]
     fn v4l2_struct_layout_matches_linux_headers() {
         assert_eq!(mem::size_of::<V4l2Capability>(), 104);
         assert_eq!(mem::size_of::<V4l2PixFormat>(), 48);
         assert_eq!(mem::size_of::<V4l2Format>(), 208);
+        assert_eq!(offset_of!(V4l2Format, fmt), 4);
+        assert_eq!(offset_of!(V4l2PixFormat, pixelformat), 8);
     }
 
     #[test]

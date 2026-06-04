@@ -181,7 +181,7 @@ setup(
     ext_modules=ext_modules,
     rust_extensions=rust_extensions,
     packages = find_packages(),
-    setup_requires=['pybind11>=2.6.0', 'setuptools-rust'],
+    setup_requires=['pybind11>=2.6.0', 'setuptools-rust>=1.10.2,<1.11.0'],
     install_requires=['numpy'],
     python_requires='>=3.8',
     cmdclass={'build_ext': BuildExt},

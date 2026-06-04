@@ -18,10 +18,17 @@ impl Camera {
     fn new(
         width: u32,
         height: u32,
-        #[allow(unused_variables)] fps: f64,
+        fps: f64,
         fourcc: u32,
         device: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Self> {
+        if !fps.is_finite() || fps <= 0.0 {
+            return Err(PyValueError::new_err("fps must be a positive finite number"));
+        }
+        // fps is handled by the Python Camera wrapper for pacing; the Linux
+        // v4l2loopback backend does not configure device frame rate (same as
+        // the legacy C++ backend).
+        let _ = fps;
         let devices = parse_devices(device)?;
         let camera = V4l2LoopbackCamera::new(width, height, fourcc, devices).map_err(to_py_err)?;
         Ok(Self { camera })
