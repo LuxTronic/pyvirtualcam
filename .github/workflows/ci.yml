@@ -236,13 +236,13 @@ jobs:
         cargo --version
 
     - name: Test pyvirtualcam-core
-      run: cargo test -p pyvirtualcam-core
+      run: cargo test -p pyvirtualcam-core --locked
 
     - name: List pyvirtualcam-core package contents
-      run: cargo package -p pyvirtualcam-core --list
+      run: cargo package -p pyvirtualcam-core --list --locked
 
     - name: Package pyvirtualcam-core
-      run: cargo package -p pyvirtualcam-core
+      run: cargo package -p pyvirtualcam-core --locked
 
     - name: Store Rust crate as artifact
       uses: actions/upload-artifact@v4
