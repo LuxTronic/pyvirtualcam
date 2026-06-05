@@ -224,6 +224,32 @@ jobs:
     #   with:
     #     category: ${{ matrix.config.os-name }}
 
+  rust-crate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Show Rust toolchain
+      run: |
+        rustc --version
+        cargo --version
+
+    - name: Test pyvirtualcam-core
+      run: cargo test -p pyvirtualcam-core
+
+    - name: List pyvirtualcam-core package contents
+      run: cargo package -p pyvirtualcam-core --list
+
+    - name: Package pyvirtualcam-core
+      run: cargo package -p pyvirtualcam-core
+
+    - name: Store Rust crate as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: crate-pyvirtualcam-core
+        path: target/package/pyvirtualcam-core-*.crate
+
   test:
     strategy:
       fail-fast: false
@@ -392,7 +418,7 @@ jobs:
   publish-wheels:
     runs-on: ubuntu-latest
 
-    needs: [test, docs]
+    needs: [test, docs, rust-crate]
 
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 
@@ -407,10 +433,18 @@ jobs:
         merge-multiple: true
         path: dist
 
-    - name: Create Release and Upload Wheels
+    - name: Download Rust crate from artifact storage
+      uses: actions/download-artifact@v4
+      with:
+        name: crate-pyvirtualcam-core
+        path: dist
+
+    - name: Create Release and Upload Artifacts
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/*.whl
+        files: |
+          dist/*.whl
+          dist/*.crate
 
   # PyPI publishing disabled for this fork
   # Wheels are available as GitHub Actions artifacts after each build

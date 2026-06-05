@@ -1,10 +1,26 @@
 [package]
 name = "pyvirtualcam-core"
-version = "0.0.0"
+version = "0.15.0"
 edition = "2021"
+description = "Native Rust core for pyvirtualcam, including a Linux v4l2loopback backend"
 license = "GPL-2.0-only"
 build = "build.rs"
 readme = "README.md"
+repository = "https://github.com/LuxTronic/pyvirtualcam"
+homepage = "https://github.com/LuxTronic/pyvirtualcam"
+keywords = ["virtual-camera", "v4l2", "v4l2loopback", "linux", "video"]
+categories = ["api-bindings", "multimedia::video", "os::unix-apis"]
+include = [
+    "Cargo.toml",
+    "README.md",
+    "build.rs",
+    "src/**",
+    "cpp/**",
+    "examples/**",
+    "vendor/libyuv/LICENSE",
+    "vendor/libyuv/include/**",
+    "vendor/libyuv/source/**",
+]
 
 [features]
 default = ["linux"]
