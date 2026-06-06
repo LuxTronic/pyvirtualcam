@@ -23,7 +23,9 @@ impl Camera {
         device: Option<&Bound<'_, PyAny>>,
     ) -> PyResult<Self> {
         if !fps.is_finite() || fps <= 0.0 {
-            return Err(PyValueError::new_err("fps must be a positive finite number"));
+            return Err(PyValueError::new_err(
+                "fps must be a positive finite number",
+            ));
         }
         // fps is handled by the Python Camera wrapper for pacing; the Linux
         // v4l2loopback backend does not configure device frame rate (same as

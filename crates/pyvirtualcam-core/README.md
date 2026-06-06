@@ -31,9 +31,48 @@ Linux `v4l2loopback` is the first Rust backend. macOS and Windows still use the
 existing native implementations until they can be ported and tested without
 changing Python behavior.
 
+## Rust Usage
+
+Add the crate to a Rust application:
+
+```toml
+[dependencies]
+pyvirtualcam-core = "0.15.0"
+```
+
+Then create a virtual camera and send frames:
+
+```rust
+use pyvirtualcam_core::{CameraBuilder, PixelFormat, Result};
+
+fn main() -> Result<()> {
+    let width = 640;
+    let height = 480;
+    let mut camera = CameraBuilder::new(width, height, 30.0)
+        .format(PixelFormat::Rgb)
+        .build()?;
+
+    let frame = vec![0; PixelFormat::Rgb.frame_size(width, height)];
+    camera.send(&frame)?;
+    camera.close();
+
+    Ok(())
+}
+```
+
+The native Rust API currently supports Linux through `v4l2loopback`. Before
+running an application, load and configure a loopback device, for example:
+
+```shell
+sudo modprobe v4l2loopback devices=1 video_nr=10 card_label="pyvirtualcam"
+```
+
+The crate builds a small vendored copy of libyuv through the `cc` crate, so a
+C++ compiler is required when compiling dependents.
+
 ## Pixel Conversion
 
-This crate continues to build the vendored `external/libyuv` source instead of
+This crate builds the vendored `vendor/libyuv` source instead of
 reimplementing pixel conversion in Rust.
 
 That choice is deliberate:

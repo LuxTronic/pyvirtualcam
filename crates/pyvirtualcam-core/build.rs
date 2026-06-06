@@ -4,12 +4,12 @@ use std::path::PathBuf;
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
-    let repo_root = manifest_dir.join("../..");
-    let libyuv_source_dir = repo_root.join("external/libyuv/source");
-    let libyuv_include_dir = repo_root.join("external/libyuv/include");
+    let libyuv_dir = manifest_dir.join("vendor/libyuv");
+    let libyuv_source_dir = libyuv_dir.join("source");
+    let libyuv_include_dir = libyuv_dir.join("include");
 
     if !libyuv_source_dir.exists() {
-        panic!("external/libyuv/source not found; initialize the libyuv submodule");
+        panic!("vendor/libyuv/source not found; the crate package is incomplete");
     }
 
     let mut build = cc::Build::new();
