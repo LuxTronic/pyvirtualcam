@@ -68,11 +68,11 @@ fn parse_devices(device: Option<&Bound<'_, PyAny>>) -> PyResult<Option<Vec<Strin
         return Ok(None);
     }
 
-    if device.downcast::<PyString>().is_ok() {
+    if device.cast::<PyString>().is_ok() {
         return Ok(Some(vec![to_string_like(device)?]));
     }
 
-    if let Ok(sequence) = device.downcast::<PySequence>() {
+    if let Ok(sequence) = device.cast::<PySequence>() {
         let len = sequence.len()?;
         let mut devices = Vec::with_capacity(len);
         for index in 0..len {
