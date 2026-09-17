@@ -3,10 +3,6 @@ pytest
 # https://github.com/opencv/opencv-python/issues/291#issuecomment-841816850
 opencv-python; sys_platform != 'darwin'
 imageio
-# pillow 12.3.0 dropped manylinux2014 wheels (manylinux_2_28 only), so pip falls back to a
-# source build inside the manylinux2014 CI container and fails. 12.2.x still ships them.
-# Only the 3.10/3.11 matrix entries are affected, since 12.3.0 requires Python >=3.10.
-pillow<12.3
 
 # documentation dependencies
 sphinx
